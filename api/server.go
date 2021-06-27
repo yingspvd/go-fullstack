@@ -6,8 +6,8 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/yingspvd/fullstack/api/controllers"
-	"github.com/yingspvd/fullstack/api/seed"
+	"github.com/yingspvd/go-fullstack/api/controllers"
+	"github.com/yingspvd/go-fullstack/api/seed"
 )
 
 var server = controllers.Server{}
