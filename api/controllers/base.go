@@ -7,7 +7,11 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
-	"github.com/yingspvd/go-fullstack/api/models"
+
+	_ "github.com/jinzhu/gorm/dialects/mysql"    //mysql database driver
+	_ "github.com/jinzhu/gorm/dialects/postgres" //postgres database driver
+
+	"github.com/yingspvd/fullstack/api/models"
 )
 
 type Server struct {
@@ -16,20 +20,31 @@ type Server struct {
 }
 
 func (server *Server) Initialize(Dbdriver, DbUser, DbPassword, DbPort, DbHost, DbName string) {
+
 	var err error
 
 	if Dbdriver == "mysql" {
-		DBURL := fmt.Sprint("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", DbUser, DbPassword, DbHost, DbPort, DbName)
-		server.DB, error = gorm.Open(Dbdriver, DBURL)
+		DBURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", DbUser, DbPassword, DbHost, DbPort, DbName)
+		server.DB, err = gorm.Open(Dbdriver, DBURL)
 		if err != nil {
 			fmt.Printf("Cannot connect to %s database", Dbdriver)
-			log.Fatal("This is the error : ", err)
+			log.Fatal("This is the error:", err)
+		} else {
+			fmt.Printf("We are connected to the %s database", Dbdriver)
+		}
+	}
+	if Dbdriver == "postgres" {
+		DBURL := fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable password=%s", DbHost, DbPort, DbUser, DbName, DbPassword)
+		server.DB, err = gorm.Open(Dbdriver, DBURL)
+		if err != nil {
+			fmt.Printf("Cannot connect to %s database", Dbdriver)
+			log.Fatal("This is the error:", err)
 		} else {
 			fmt.Printf("We are connected to the %s database", Dbdriver)
 		}
 	}
 
-	server.DB.Debug().AutoMigrate(&models.User{}, &models.Post{})
+	server.DB.Debug().AutoMigrate(&models.User{}, &models.Post{}) //database migration
 
 	server.Router = mux.NewRouter()
 
